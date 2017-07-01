@@ -37,6 +37,7 @@ subscriptions model =
     case model.isPaused of
         True ->
             Sub.batch []
+
         False ->
             Sub.batch
                 [
@@ -97,33 +98,16 @@ tickGame model =
 tickCell : Int -> Model -> Bool
 tickCell idx model =
     let
-        currentState =
-            Array.get idx model.cells
-
-        neighborIdxs =
-            getNeighborIdxs idx
-
-        neighborsStates =
-            List.map
-                (\n -> boolToInt <| Array.get n model.cells)
-                neighborIdxs
-
         neighborsAlive =
-            List.sum neighborsStates
+            getNeighborIdxs idx
+                |> List.map (\n -> Array.get n model.cells)
+                |> List.filter (\n -> n == Just True)
+                |> List.length
     in
-        case currentState of
-            Nothing -> False
-            Just True ->
-                if neighborsAlive == 2 || neighborsAlive == 3 then
-                    True
-                else
-                    False
-
-            Just False ->
-                if neighborsAlive == 3 then
-                    True
-                else
-                    False
+        case Array.get idx model.cells of
+            Nothing ->  False
+            Just True -> neighborsAlive == 2 || neighborsAlive == 3
+            Just False -> neighborsAlive == 3
 
 
 getNeighborIdxs : Int -> List Int
